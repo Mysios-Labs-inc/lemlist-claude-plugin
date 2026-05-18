@@ -1,0 +1,62 @@
+{
+  "name": "lemlist-skills",
+  "version": "1.0.0",
+  "description": "Installable Claude Code skills for GTM, outbound, and revenue operations.",
+  "bin": {
+    "lemlist-skills": "bin/install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "campaign-angle-finder/",
+    "claap-sales-opportunity-detector/",
+    "cold-call-script/",
+    "company-finder/",
+    "competitor-finder/",
+    "copywriting-analyzer/",
+    "copywriting-first-touch/",
+    "copywriting-follow-up/",
+    "copywriting-ic-sequence/",
+    "copywriting-manager-sequence/",
+    "copywriting-refiner/",
+    "copywriting-vp-sequence/",
+    "crm-duplicate-detector/",
+    "cta-designer/",
+    "deep-company-analyser/",
+    "gtm-action-thinker/",
+    "icp-definer/",
+    "linkedin-outbound-angle/",
+    "linkedin-sequence/",
+    "list-builder/",
+    "market-research-edp/",
+    "n8n-debugger/",
+    "n8n-workflow-builder/",
+    "niche-data-finder/",
+    "offer-definer/",
+    "outbound-analyst/",
+    "outbound-campaign-architect/",
+    "pain-identifier/",
+    "people-finder/",
+    "persona-definer/",
+    "persona-insights-analysis/",
+    "pipeline-analysis/",
+    "prompt-engineering/",
+    "reply-handler/",
+    "slide-deck-builder/",
+    "trigger-finder/",
+    "value-prop-lister/",
+    "website-scraper/"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "skills",
+    "lemlist",
+    "outbound",
+    "gtm",
+    "sales"
+  ],
+  "license": "MIT"
+}
