@@ -47,6 +47,11 @@ Group nodes into logical sections using **Sticky Note** nodes as section headers
 [TRIGGER] → [VALIDATION] → [ENRICHMENT] → [ACTION] → [LOGGING]
 ```
 
+### Reuse proven per-integration patterns
+For each integration identified in Phase 1, read the matching file listed in
+"Integration Patterns — Reference Index" below and reuse its node flow rather
+than inventing one. Load only the files for integrations actually in scope.
+
 ---
 
 ## Phase 3 — Naming Conventions
@@ -238,228 +243,24 @@ Always end with a **step-by-step test plan**:
 
 ---
 
-## Integration Patterns
+## Integration Patterns — Reference Index
 
-### lemlist
+Ready-made node flow patterns exist for each supported platform. During Phase 2
+(architecture), read ONLY the reference files for the integrations identified in
+Phase 1 — do not load all of them.
 
-**Add lead to campaign (with dedup check)**
-```
-Check - Lead Already in Campaign
-  ├─ NO  → lemlist - Add Lead to Campaign
-  │          ├─ success → Log - Lead Added
-  │          └─ error   → Error - lemlist API Failed → [notifier]
-  └─ YES → Log - Skipped Duplicate
-```
+| Integration | Read when the workflow involves | File |
+|---|---|---|
+| lemlist | Adding/removing leads from campaigns, updating lead variables, handling reply/interest events | `references/integrations/lemlist.md` |
+| Clay | Person or company enrichment, waterfall enrichment across providers | `references/integrations/clay.md` |
+| HubSpot | Contact upsert, deal creation/association, deal stage updates, scheduled contact sync | `references/integrations/hubspot.md` |
+| Salesforce | Lead upsert, lead conversion to contact + opportunity, opportunity stage sync | `references/integrations/salesforce.md` |
+| Slack | Channel notifications, Block Kit interactive approval flows | `references/integrations/slack.md` |
+| Notion | Execution logging, reading input from a database, writing enriched records | `references/integrations/notion.md` |
+| Webhooks & Generic API | Inbound webhooks, polling schedules, OAuth token refresh, rate limiting (429) | `references/integrations/webhooks-generic-api.md` |
 
-**Remove lead from campaign**
-```
-lemlist - Search Lead by Email
-  ├─ found     → lemlist - Unsubscribe Lead → Log - Lead Removed
-  └─ not found → Log - Lead Not Found, Skip
-```
-
-**Update lead custom variables**
-```
-Set - Build Variables Payload
-→ lemlist - Update Lead Variables
-  ├─ success → Log - Variables Updated
-  └─ error   → Error - Update Failed
-```
-
-**Mark lead as interested / not interested**
-```
-Check - Lead Status from Webhook
-  ├─ interested     → HubSpot - Update Deal Stage + Log
-  ├─ not interested → lemlist - Unsubscribe + CRM - Log Lost
-  └─ unknown        → Log - Unhandled Status
-```
-
----
-
-### Clay
-
-**Enrich person by LinkedIn URL**
-```
-Check - LinkedIn URL Present
-  ├─ YES → Clay - Find Person by LinkedIn
-  │          ├─ found     → Set - Extract Key Fields (name, title, company, email)
-  │          └─ not found → Log - Enrichment Failed, Skip
-  └─ NO  → Log - Missing LinkedIn URL, Skip
-```
-
-**Enrich company by domain**
-```
-Clay - Find Company by Domain
-  ├─ found     → Set - Extract Company Fields (size, industry, tech stack)
-  └─ not found → Set - Flag as Unenriched → Log
-```
-
-**Waterfall enrichment (multiple providers)**
-```
-Clay - Enrich Email via Provider 1
-  ├─ found → continue
-  └─ empty → Clay - Enrich Email via Provider 2
-               ├─ found → continue
-               └─ empty → Log - No Email Found, Skip Lead
-```
-
----
-
-### HubSpot
-
-**Upsert contact**
-```
-HubSpot - Search Contact by Email
-  ├─ exists → HubSpot - Update Contact Properties
-  └─ new    → HubSpot - Create Contact
-→ Set - Store HubSpot Contact ID
-→ Log - HubSpot Contact Synced
-```
-
-**Create deal linked to contact**
-```
-HubSpot - Search Contact by Email
-→ HubSpot - Create Deal
-→ HubSpot - Associate Deal to Contact
-→ Log - Deal Created
-```
-
-**Update deal stage from webhook**
-```
-Trigger - Webhook (lemlist reply event)
-→ Set - Normalize Payload
-→ HubSpot - Search Deal by Contact Email
-  ├─ found → HubSpot - Update Deal Stage
-  └─ none  → HubSpot - Create Deal (fallback)
-→ Log - Deal Stage Updated
-```
-
-**Sync contacts to lemlist (scheduled)**
-```
-Trigger - Schedule (daily)
-→ HubSpot - Get Contacts (filter: list or property)
-→ Loop - Process Contacts Batch
-  → Check - Already in lemlist Campaign
-    ├─ NO  → lemlist - Add to Campaign
-    └─ YES → Log - Skipped
-→ Log - Sync Complete (count in, count out)
-```
-
----
-
-### Salesforce
-
-**Upsert lead**
-```
-Salesforce - Search Lead by Email
-  ├─ exists → Salesforce - Update Lead
-  └─ new    → Salesforce - Create Lead
-→ Log - Salesforce Lead Synced
-```
-
-**Convert lead to contact + opportunity**
-```
-Salesforce - Get Lead by ID
-→ Salesforce - Convert Lead
-  ├─ success → Salesforce - Create Opportunity → Log
-  └─ error   → Error - Conversion Failed → [notifier]
-```
-
-**Sync Salesforce opportunity stage to lemlist**
-```
-Trigger - Salesforce Opportunity Updated (webhook or poll)
-→ Check - Stage Changed to Target Value
-  ├─ YES → lemlist - Add Contact to Re-engagement Campaign
-  └─ NO  → Log - Stage Change Ignored
-```
-
----
-
-### Slack
-
-**Send enriched lead summary to channel**
-```
-Set - Format Slack Message (name, title, company, source)
-→ Slack - Post Message to Channel
-→ Log - Notification Sent
-```
-
-**Interactive approval before adding to campaign**
-```
-Slack - Send Approval Message (Block Kit with Approve / Reject buttons)
-→ Trigger - Slack Interaction Webhook
-  ├─ approved → lemlist - Add to Campaign → Slack - Confirm to Requester
-  └─ rejected → Log - Lead Rejected → Slack - Confirm Rejection
-```
-
----
-
-### Notion
-
-**Log workflow execution**
-```
-Set - Build Log Payload (workflow name, status, record count, timestamp)
-→ Notion - Create Page in Log Database
-```
-
-**Read input data from Notion database**
-```
-Trigger - Schedule or Manual
-→ Notion - Query Database (filter: Status = "To Process")
-→ Loop - Process Items
-  → [main logic]
-  → Notion - Update Page Status to "Done"
-```
-
-**Write enriched leads to Notion**
-```
-Clay - Enrich Person
-→ Set - Map Fields to Notion Schema
-→ Notion - Create or Update Page
-→ Log - Written to Notion
-```
-
----
-
-### Webhooks & Generic API
-
-**Inbound webhook → multi-destination sync**
-```
-Trigger - Webhook
-→ Set - Validate and Normalize Payload
-→ Check - Event Type
-  ├─ "email_opened"  → HubSpot - Log Activity
-  ├─ "replied"       → HubSpot - Update Deal + Slack Notify
-  ├─ "unsubscribed"  → Salesforce - Update Lead Status + lemlist - Remove
-  └─ unknown         → Log - Unhandled Event Type
-```
-
-**Polling API (no webhook available)**
-```
-Trigger - Schedule (every X minutes)
-→ HTTP Request - GET API Endpoint
-→ Check - New Records Since Last Run
-  ├─ YES → Loop - Process New Records
-  └─ NO  → Log - Nothing New, End
-```
-
-**OAuth token refresh pattern**
-```
-HTTP Request - Call API
-  ├─ success (200) → continue
-  └─ error (401)   → HTTP Request - Refresh Token
-                   → Set - Store New Token
-                   → HTTP Request - Retry Original Call
-```
-
-**Rate limiting handler**
-```
-HTTP Request - Call API
-  ├─ success       → continue
-  └─ error (429)   → Wait - 60 seconds
-                   → HTTP Request - Retry (max 3 attempts)
-                   → error after retries → Error - Rate Limit Exceeded
-```
+If the workflow uses a tool with no reference file, apply the generic patterns in
+`references/integrations/webhooks-generic-api.md` via HTTP Request nodes.
 
 ---
 

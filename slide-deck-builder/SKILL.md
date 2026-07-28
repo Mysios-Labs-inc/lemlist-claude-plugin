@@ -17,6 +17,14 @@ and produce a polished, visually engaging .pptx file using PptxGenJS.
 
 Always respond in the user's language.
 
+Work through the six phases in order.
+
+**Bundled resources**
+- `references/design.md` — color palettes, typography scale, layout catalog, design and
+  PptxGenJS rules. Read during Phase 3.
+- `scripts/generate_deck.js` — setup commands and the PptxGenJS generation scaffold with
+  helpers and example slide builders. Copy and fill in during Phase 4.
+
 ---
 
 ## Phase 1 — Ingest the Source Document
@@ -94,97 +102,34 @@ Apply the right slide blueprint based on deck type.
 
 ## Phase 3 — Design Decisions
 
-Before writing code, choose the visual system. Apply these rules:
+Before writing code, choose the visual system: color palette, typography, and the
+layout for each slide.
 
-### Color palette
-Pick a palette suited to the deck type and content tone. Never default to generic blue.
+**Read `references/design.md`** for the palette table (matched to deck type), the
+sandwich structure rule, the type scale, the eight approved layouts, and the design
+and PptxGenJS constraints that must not be violated.
 
-| Deck type | Recommended palette |
-|---|---|
-| Sales deck | Ocean Gradient (`065A82` / `1C7293` / `21295C`) or Cherry Bold (`990011` / `FCF6F5` / `2F3C7E`) |
-| QBR internal | Midnight Executive (`1E2761` / `CADCFC` / `FFFFFF`) or Charcoal Minimal (`36454F` / `F2F2F2`) |
-| Case study | Teal Trust (`028090` / `00A896` / `02C39A`) or Warm Terracotta (`B85042` / `E7E8D1` / `A7BEAE`) |
-| Onboarding | Sage Calm (`84B59F` / `69A297` / `50808E`) or Coral Energy (`F96167` / `F9E795` / `2F3C7E`) |
-
-Apply the sandwich structure: dark background on cover + closing slides, light on content slides.
-
-### Typography
-Use `Georgia` (header) + `Calibri` (body) as default pairing.
-- Slide titles: 36–40pt bold
-- Section headers: 22–26pt bold
-- Body text: 14–16pt
-- Captions / labels: 10–12pt muted
-
-### Layout variety
-Vary layouts across slides — never repeat the same layout twice in a row:
-- **Title only** — cover, section dividers
-- **Two-column** — text left, visual or stat right
-- **Icon row** — 3 icons in colored circles with labels below
-- **2x2 grid** — 4 content blocks
-- **Large stat callout** — 60-72pt number + small label
-- **Quote card** — centered quote + attribution on dark background
-- **Timeline** — numbered horizontal steps
-- **Table** — for structured data (QBR metrics, pricing)
-
-### Key design rules (from pptx skill)
-- Every slide needs a visual element — shape, icon, chart, or background treatment
-- No text-only slides
-- Never use accent lines under titles (hallmark of AI-generated slides)
-- 0.5" minimum margins, 0.3–0.5" between content blocks
-- Left-align body text, center only titles
-- Never use `#` with hex colors in PptxGenJS (causes corruption)
-- Never reuse option objects across shape calls — use factory functions for shadows
-- Use `bullet: true`, never unicode `•`
-- Use `breakLine: true` between array items
+Record the chosen palette and font pairing — they are reported back to the user in
+Phase 6.
 
 ---
 
 ## Phase 4 — Generate the .pptx
 
-### Setup
+Use `scripts/generate_deck.js` as the starting scaffold. It contains the setup
+commands, the PptxGenJS boilerplate, the icon and shadow helpers, and example slide
+builder functions (cover, stat callout, bullets + visual, quote card).
+
 ```bash
-pip install markitdown --break-system-packages
-npm install -g pptxgenjs react react-dom react-icons sharp
+mkdir -p /home/claude/deck
+cp scripts/generate_deck.js /home/claude/deck/generate.js
+# apply the Phase 3 palette to THEME, write the slide functions, then:
+node /home/claude/deck/generate.js
 ```
 
-### Script structure
-Create `/home/claude/deck/generate.js` with:
-```javascript
-const pptxgen = require("pptxgenjs");
-const React = require("react");
-const ReactDOMServer = require("react-dom/server");
-const sharp = require("sharp");
-
-// Icon helper — always use fresh objects
-async function iconToBase64Png(IconComponent, color, size = 256) {
-  const svg = ReactDOMServer.renderToStaticMarkup(
-    React.createElement(IconComponent, { color, size: String(size) })
-  );
-  const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
-  return "image/png;base64," + pngBuffer.toString("base64");
-}
-
-// Shadow factory — never reuse, always call fresh
-const makeShadow = () => ({
-  type: "outer", blur: 6, offset: 2, color: "000000", opacity: 0.12
-});
-
-let pres = new pptxgen();
-pres.layout = "LAYOUT_16x9";
-pres.title = "Deck Title";
-
-// [slides here]
-
-pres.writeFile({ fileName: "/home/claude/deck/output.pptx" });
-```
-
-### Slide generation principles
-- Build each slide as a function for clarity
-- Add speaker notes to every slide with 1–2 sentences of talking points
-- Use real content from the source document — no placeholders
-- For metrics/KPIs: use large stat callout layout (60–72pt number)
-- For processes: use numbered shape + text rows
-- For quotes: dark background card with centered white text
+The scaffold header documents the slide generation principles (one function per
+slide, speaker notes on every slide, real source content only, stat callouts for
+KPIs, numbered rows for processes, dark quote cards). Read it before editing.
 
 ---
 
@@ -251,7 +196,7 @@ After presenting the file, provide a brief summary:
 
 ### QBR / Internal Reporting
 - Every metric needs: target, actual, delta, and RAG status
-- RAG colors: Red = `C0392B`, Amber = `E67E22`, Green = `27AE60`
+- RAG status colors are in `references/design.md`
 - Owners must be named for action items
 - Executive summary slide must fit on one slide with 3 KPIs max
 

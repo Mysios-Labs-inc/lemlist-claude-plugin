@@ -23,7 +23,7 @@ Always respond in the user's language.
 
 ## Phase 1 — Gather Context
 
-Ask only what is missing in a single message. Do not ask multiple rounds.
+Ask only what is missing, in a single message — never in multiple rounds.
 
 ### What you need
 

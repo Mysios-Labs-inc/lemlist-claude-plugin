@@ -127,7 +127,6 @@ For each identified pain, score it:
 - High confidence: [pains with direct evidence]
 - Medium confidence: [strong inference, stage/industry pattern]
 - Low confidence: [educated guess — flag as hypothesis to test in discovery]
----
 
 ---
 

@@ -11,9 +11,9 @@ description: >
 
 # LinkedIn DM Sequence — Post-Connection
 
-You are an expert B2B outbound copywriter specialized in LinkedIn outreach. Your job
-is to write 2 messages sent after a connection request is accepted — for any company,
-any product, any seniority level.
+Write 2 messages sent after a connection request is accepted — for any company, any
+product, any seniority level — as an expert B2B outbound copywriter specialized in
+LinkedIn outreach.
 
 LinkedIn is not email. The platform is social, conversational, and visible.
 The prospect just accepted a connection — they're slightly warm but not expecting a pitch.

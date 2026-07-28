@@ -17,77 +17,29 @@ score each pair, produce a merge plan, and deliver actionable prevention rules.
 
 Always respond in the user's language.
 
+## Bundled references
+
+- **references/sources.md** — field maps and fetch queries for the three input sources
+  (CSV export, HubSpot MCP, Salesforce MCP). Read in Phase 1, for the user's source only.
+- **references/scoring.md** — Contact and Company scoring matrices plus confidence tier
+  thresholds. Read in Phase 3.
+
+Work through the five phases in order.
+
 ---
 
 ## Phase 1 — Data Ingestion
 
-### Source A — CSV Export
-Expected columns for **Contacts**:
-- `id` or `record_id` (CRM internal ID — critical for merge actions)
-- `email`
-- `first_name`, `last_name`
-- `phone`
-- `company` or `company_name`
-- `job_title`
-- `created_date`
-- `last_modified_date`
-- `owner`
-- `lifecycle_stage` or `lead_status`
+Identify which of the three supported sources the user has, then load
+**references/sources.md** and follow the matching section:
 
-Expected columns for **Companies / Accounts**:
-- `id` or `record_id`
-- `name` (company name)
-- `domain` or `website`
-- `phone`
-- `city`, `country`
-- `industry`
-- `employee_count`
-- `created_date`
-- `last_modified_date`
-- `owner`
-- `associated_contacts_count`
+- **Source A — CSV export**: expected contact and company columns, plus the missing-field
+  checks to run before proceeding.
+- **Source B — HubSpot MCP**: `getAll` calls and the exact property lists to request.
+- **Source C — Salesforce MCP**: the SOQL queries for Contact and Account.
 
-If columns are named differently, infer and normalize. Flag any missing critical fields
-(`id`, `email` for contacts / `id`, `domain` for companies) before proceeding.
-
-### Source B — HubSpot MCP
-Fetch contacts:
-```
-resource: contact
-operation: getAll
-properties: hs_object_id, email, firstname, lastname, phone, company,
-            jobtitle, createdate, hs_lastmodifieddate, hubspot_owner_id,
-            lifecyclestage, hs_lead_status, associatedcompanyid
-limit: up to 1000 (paginate if needed)
-```
-
-Fetch companies:
-```
-resource: company
-operation: getAll
-properties: hs_object_id, name, domain, phone, city, country, industry,
-            numberofemployees, createdate, hs_lastmodifieddate,
-            hubspot_owner_id, num_associated_contacts
-limit: up to 1000 (paginate if needed)
-```
-
-### Source C — Salesforce MCP
-Query contacts:
-```sql
-SELECT Id, Email, FirstName, LastName, Phone, Account.Name, Title,
-       CreatedDate, LastModifiedDate, OwnerId, LeadSource
-FROM Contact
-LIMIT 2000
-```
-
-Query accounts:
-```sql
-SELECT Id, Name, Website, Phone, BillingCity, BillingCountry, Industry,
-       NumberOfEmployees, CreatedDate, LastModifiedDate, OwnerId,
-       (SELECT COUNT(Id) FROM Contacts)
-FROM Account
-LIMIT 2000
-```
+Ingest contacts and companies separately — they are matched, scored, and merged as two
+independent passes throughout the rest of the workflow.
 
 ### Scale warning
 If the dataset exceeds 5,000 records, warn the user:
@@ -156,49 +108,15 @@ AB, AS, ApS, Oy, SpA, Srl, Lda
 
 ## Phase 3 — Confidence Scoring
 
-Score each candidate pair 0–100. Classify into 3 tiers.
+Score each candidate pair 0–100 and classify it into a tier.
 
-### Contact Scoring Matrix
+See **references/scoring.md** for the Contact scoring matrix, the Company scoring matrix
+(including the negative-signal penalties), and the HIGH / MEDIUM / LOW tier thresholds
+with their recommended actions. Load it before scoring any pair — apply the point values
+exactly as written rather than estimating.
 
-| Condition | Points |
-|---|---|
-| Exact email match | +60 |
-| Email domain match (same company) | +20 |
-| First name exact match | +10 |
-| Last name exact match | +15 |
-| First name fuzzy match (distance ≤ 2) | +5 |
-| Phone match (digits only) | +20 |
-| Company name match (normalized) | +10 |
-| Job title match (same function) | +5 |
-| Created within 30 days of each other | +5 |
-| Same owner | +3 |
-| Different lifecycle stage | −10 |
-| Different associated company | −5 |
-
-### Company Scoring Matrix
-
-| Condition | Points |
-|---|---|
-| Exact domain match | +70 |
-| Normalized name exact match | +50 |
-| Normalized name fuzzy match (distance ≤ 3) | +25 |
-| Phone match | +20 |
-| City + country match | +10 |
-| Industry match | +8 |
-| Employee count within 20% | +5 |
-| 2+ shared contacts | +15 |
-| Created within 60 days | +5 |
-| Very different employee counts (>5x) | −15 |
-| Different countries | −20 |
-
-### Confidence Tiers
-
-| Score | Tier | Action |
-|---|---|---|
-| 80–100 | HIGH — Confirmed duplicate | Safe to merge automatically |
-| 50–79 | MEDIUM — Likely duplicate | Review before merging |
-| 20–49 | LOW — Possible duplicate | Manual investigation required |
-| < 20 | Not a duplicate | Discard pair |
+Only HIGH and MEDIUM pairs continue to Phase 4; LOW pairs are reported for manual
+investigation, and pairs below the threshold are discarded.
 
 ---
 

@@ -12,148 +12,110 @@ description: >
 
 # Website Scraper
 
-You are an expert web scraper. The user will provide a URL and a description of the
-data they want to extract. Your job is to fetch the page, locate the right elements,
-extract clean structured data, and export it to a CSV.
+Fetch the page, locate the right elements, extract clean structured data,
+export it to a CSV. Always respond in the user's language.
 
-Always respond in the user's language.
+## Bundled resources
+
+| File | Use it for |
+|---|---|
+| `scripts/scrape_utils.py` | Shared helpers: headers, retry, robots.txt, safe extraction, cleaning, dedup, QA, CSV export. Import from the other scripts or copy pieces into an ad-hoc scraper. |
+| `scripts/scrape_paginated.py` | **Strategy B** — requests + BeautifulSoup with pagination (URL pattern or "Next" button). |
+| `scripts/sitemap_crawl.py` | **Strategy C** — discover all page URLs of a domain from its sitemap. |
+| `scripts/api_scrape.py` | **Strategy D** — pull records from an internal JSON API endpoint. |
+| `references/patterns.md` | Selector recipes per page type (directories, blog indexes, product lists, tables, pagination) plus selector-discovery tips. Read in Phase 3 when choosing selectors. |
+
+Run any script with `--help` for its full argument list.
+
+### Dependencies
+
+Install before running any script:
+
+```bash
+pip install requests beautifulsoup4 lxml --break-system-packages
+```
+
+`lxml` is what parses XML sitemaps, so it is required for `sitemap_crawl.py`.
 
 ---
 
 ## Phase 1 — Clarify Before Starting
 
 Check what you already know from the conversation. Ask only what is missing — in a
-single message.
-
-### What to confirm if not provided
+single message. If the user already specified the URL and fields clearly, skip
+Phase 1 and proceed.
 
 **1. Target URL(s)**
 - Single page, list of pages, or a domain to crawl?
 - If multiple pages: is there a pattern? (e.g., `/page/1`, `/page/2` or `?p=1`)
 - If a domain: how deep to crawl? (just the homepage, all blog posts, all product pages?)
 
-**2. Fields to extract**
-Ask the user to list exactly what they want. Examples:
+**2. Fields to extract** — ask the user to list exactly what they want. Examples:
 - Company name, website, email, phone, LinkedIn URL
 - Product name, price, description, availability
 - Job title, location, salary, apply link
 - Article title, author, date, URL, excerpt
 
-**3. Output filename**
-Default: `scraped-data.csv` — ask only if they seem to care about naming.
-
-If the user already specified the URL and fields clearly, skip Phase 1 and proceed.
+**3. Output filename** — default `scraped-data.csv`; ask only if they seem to
+care about naming.
 
 ---
 
 ## Phase 2 — Fetch & Explore the Page
 
-### Step 1 — Fetch the page
-Use the `web_fetch` tool to retrieve the target URL.
+**Step 1 — Fetch.** Use the `web_fetch` tool to retrieve the target URL. If the
+page errors or comes back empty:
+- Retry with `User-Agent` simulation via Python requests (`scrape_page()` in
+  `scripts/scrape_utils.py` already sends browser-like headers).
+- If the page is JavaScript-rendered and returns empty HTML → flag it to the
+  user and fall back to `requests` + `BeautifulSoup`.
 
-If the page returns an error or appears empty:
-- Try adding `User-Agent` simulation via Python requests (see script below)
-- If the page is JavaScript-rendered and returns empty HTML → flag to user and
-  use the fallback Python approach with `requests` + `BeautifulSoup`
+**Step 2 — Explore the structure.** Before writing the scraper:
+- Identify the HTML elements that contain the target data.
+- Look for repeating patterns (list items, table rows, card components).
+- Check for pagination indicators (`next` button, page numbers, infinite scroll signal).
+- Check for anti-scraping signals (Cloudflare, CAPTCHA, login wall).
 
-### Step 2 — Explore the structure
-Before writing the scraper, analyze the page:
-- Identify the HTML elements that contain the target data
-- Look for repeating patterns (list items, table rows, card components)
-- Check for pagination indicators (`next` button, page numbers, infinite scroll signal)
-- Check for anti-scraping signals (Cloudflare, CAPTCHA, login wall)
-
-### Step 3 — Report findings to user
-Briefly confirm what you found before scraping:
+**Step 3 — Report findings** before scraping:
 > "Found 47 items on this page structured as `<div class='company-card'>` blocks.
 > I can extract: name, email, website, location. Pagination detected — 8 pages total.
 > Starting extraction."
 
 ---
 
-## Phase 3 — Scraping Strategy
+## Phase 3 — Choose the Scraping Strategy
 
-Choose the right strategy based on the page type.
+| Strategy | Use for | How |
+|---|---|---|
+| **A — Direct `web_fetch`** | Static HTML pages, simple lists, single pages | Fetch with `web_fetch`, parse the returned markdown/text, extract fields by pattern matching and structure inference |
+| **B — requests + BeautifulSoup** | Paginated sites, sites requiring headers, structured HTML with CSS classes | `scripts/scrape_paginated.py` |
+| **C — Sitemap crawl** | Extracting all pages/posts from a domain | `scripts/sitemap_crawl.py` → feed the URLs to Strategy A or B |
+| **D — API / JSON endpoint** | Sites that load data from an internal API — **best case, check for it first** | `scripts/api_scrape.py` |
 
-### Strategy A — Direct web_fetch (simple pages)
-Use for: static HTML pages, simple lists, single pages.
+**Always test for Strategy D before scraping HTML:** search the page source for
+`fetch(`, `axios.get(`, XHR requests, `__NEXT_DATA__` or
+`window.__INITIAL_STATE__`. If an endpoint is found, call the JSON directly with
+`web_fetch` or `requests` — far cleaner than HTML scraping.
 
-Fetch with `web_fetch`, parse the returned markdown/text, extract fields using
-pattern matching and structure inference.
+Pick selectors with the recipes in **`references/patterns.md`** (directory
+listings, blog indexes, product lists, tables, both pagination styles).
 
-### Strategy B — Python requests + BeautifulSoup (complex pages)
-Use for: paginated sites, sites requiring headers, structured HTML with CSS classes.
+Example (Strategy B, URL-pattern pagination):
 
-```python
-import requests
-from bs4 import BeautifulSoup
-import csv
-import time
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
-
-def scrape_page(url):
-    response = requests.get(url, headers=headers, timeout=15)
-    response.raise_for_status()
-    return BeautifulSoup(response.text, "html.parser")
-
-# Pagination loop example
-results = []
-page = 1
-while True:
-    url = f"https://example.com/listings?page={page}"
-    soup = scrape_page(url)
-    items = soup.select(".item-class")  # adapt selector
-    if not items:
-        break
-    for item in items:
-        results.append({
-            "field1": item.select_one(".field1")?.get_text(strip=True),
-            "field2": item.select_one(".field2")?.get_text(strip=True),
-        })
-    page += 1
-    time.sleep(1)  # polite delay between requests
+```bash
+python3 scripts/scrape_paginated.py \
+    --url "https://example.com/listings?page={page}" \
+    --item-selector ".listing-card" \
+    --field "name=.name" --field "url=a@href" --field "location=.location" \
+    --output /mnt/user-data/outputs/scraped-data.csv
 ```
 
-### Strategy C — Sitemap crawl
-Use for: extracting all pages/posts from a domain.
+Field specs are `column=selector` for text, `column=selector@attr` for an
+attribute. The script handles the pagination loop, the 1s polite delay between
+requests, cleaning, dedup, QA and CSV export.
 
-```python
-import requests
-from bs4 import BeautifulSoup
-
-def get_sitemap_urls(domain):
-    sitemap_candidates = [
-        f"{domain}/sitemap.xml",
-        f"{domain}/sitemap_index.xml",
-        f"{domain}/sitemap-0.xml",
-    ]
-    for url in sitemap_candidates:
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            soup = BeautifulSoup(r.content, "xml")
-            return [loc.text for loc in soup.find_all("loc")]
-    return []
-```
-
-### Strategy D — API / JSON endpoint (best case)
-Some sites load data via an internal API. Before scraping HTML:
-1. Check the page source for API calls (look for `fetch(`, `axios.get(`, XHR requests)
-2. If found → call the JSON endpoint directly with `web_fetch` or `requests`
-3. Parse JSON → much cleaner than HTML scraping
-
-```python
-import requests, json
-
-response = requests.get("https://example.com/api/listings?page=1", headers=headers)
-data = response.json()
-items = data.get("results", [])
-```
+Note: Python has no `?.` optional chaining — use `text_of()` / `attr_of()` from
+`scripts/scrape_utils.py` so missing elements yield `""` instead of raising.
 
 ---
 
@@ -168,14 +130,18 @@ items = data.get("results", [])
 - For missing fields: use empty string `""` — never use `null`, `None`, or `N/A`
 - For numeric fields (price, count): strip currency symbols and units, keep number only
 
+`clean_row()`, `normalize_url()`, `normalize_email()` and `normalize_number()`
+in `scripts/scrape_utils.py` implement these rules.
+
 ### Deduplication
-Before writing to CSV:
+Before writing to CSV (`deduplicate()`):
 - Remove exact duplicate rows (all fields identical)
 - If a unique identifier exists (URL, email, ID): deduplicate on that field
+  (`--dedup-key`)
 - Report: "Removed X duplicates — Y unique records written to CSV."
 
 ### Data quality check
-After extraction, run a quick QA:
+After extraction, run a quick QA (`quality_report()`):
 - Count empty values per field → flag fields with >30% empty as "sparse"
 - Check for encoding issues (garbled characters) → re-fetch with `utf-8` if needed
 - Check for truncated values (text ending with `…`) → flag for user
@@ -184,24 +150,14 @@ After extraction, run a quick QA:
 
 ## Phase 5 — CSV Export
 
-### Write the CSV
-```python
-import csv
-
-output_path = "/mnt/user-data/outputs/scraped-data.csv"
-
-with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
-    # utf-8-sig adds BOM for Excel compatibility
-    writer = csv.DictWriter(f, fieldnames=list(results[0].keys()))
-    writer.writeheader()
-    writer.writerows(results)
-
-print(f"Written {len(results)} rows to {output_path}")
-```
+Use `write_csv(rows, output_path)` from `scripts/scrape_utils.py` (already
+called by all three scripts). Default output path:
+`/mnt/user-data/outputs/scraped-data.csv`.
 
 ### CSV formatting rules
 - Encoding: `utf-8-sig` (BOM included for Excel compatibility)
-- Delimiter: `,` (comma) — default, unless user is French/European (use `;` instead)
+- Delimiter: `,` (comma) — default, unless user is French/European (use `;` instead,
+  via `--delimiter ";"`)
 - Quote all string fields that may contain commas
 - First row: headers (snake_case, lowercase, no spaces)
 - No index column unless explicitly requested
@@ -220,9 +176,9 @@ print(f"Written {len(results)} rows to {output_path}")
 
 ## Phase 6 — Deliver & Summarize
 
-After writing the CSV, call `present_files` with the output path.
+After writing the CSV, call `present_files` with the output path. Then provide a
+short summary:
 
-Then provide a short summary:
 ```
 Scrape complete.
 
@@ -239,6 +195,15 @@ Sparse fields (>30% empty): [list or "none"]
 
 ## Anti-Scraping Handling
 
+### Robots.txt compliance
+Check `robots.txt` before scraping — `robots_allows(domain, target_url)` in
+`scripts/scrape_utils.py`; `scrape_paginated.py` runs this automatically. If the
+target path is disallowed, inform the user:
+> "The site's robots.txt asks crawlers not to access this path. Proceeding may
+> violate the site's terms of service. Do you want to continue anyway?"
+
+Wait for explicit confirmation before proceeding (then `--ignore-robots`).
+
 ### Cloudflare / bot protection
 If the page returns a Cloudflare challenge or bot detection page:
 > "This site uses bot protection (Cloudflare / CAPTCHA) that prevents automated
@@ -254,120 +219,8 @@ If the page requires authentication:
 > exported file and I'll structure it into the format you need."
 
 ### Rate limiting (429)
-If a 429 is received:
-- Back off: wait 5 seconds, retry once
-- If still 429: increase delay to 30 seconds, retry once more
-- If still blocked: notify user and stop
-
-```python
-import time
-
-def fetch_with_retry(url, max_retries=3, delay=5):
-    for attempt in range(max_retries):
-        r = requests.get(url, headers=headers, timeout=15)
-        if r.status_code == 429:
-            wait = delay * (attempt + 1)
-            print(f"Rate limited. Waiting {wait}s...")
-            time.sleep(wait)
-            continue
-        r.raise_for_status()
-        return r
-    raise Exception("Max retries reached — site is rate limiting.")
-```
-
-### Robots.txt compliance
-Before scraping, check `robots.txt`:
-```python
-from urllib.robotparser import RobotFileParser
-
-rp = RobotFileParser()
-rp.set_url(f"{domain}/robots.txt")
-rp.read()
-allowed = rp.can_fetch("*", target_url)
-```
-If `robots.txt` disallows the target path → inform the user:
-> "The site's robots.txt asks crawlers not to access this path. Proceeding may
-> violate the site's terms of service. Do you want to continue anyway?"
-Wait for explicit confirmation before proceeding.
-
----
-
-## Common Scraping Patterns
-
-### Directory / listing page (companies, people, jobs)
-```python
-items = soup.select(".listing-card")  # adapt selector
-for item in items:
-    results.append({
-        "name":     item.select_one(".name")?.get_text(strip=True) or "",
-        "url":      item.select_one("a")?.get("href", "") or "",
-        "location": item.select_one(".location")?.get_text(strip=True) or "",
-    })
-```
-
-### Article / blog index
-```python
-articles = soup.select("article")
-for a in articles:
-    results.append({
-        "title":  a.select_one("h2")?.get_text(strip=True) or "",
-        "date":   a.select_one("time")?.get("datetime", "") or "",
-        "url":    a.select_one("a")?.get("href", "") or "",
-        "author": a.select_one(".author")?.get_text(strip=True) or "",
-    })
-```
-
-### E-commerce product list
-```python
-products = soup.select(".product-item")
-for p in products:
-    price_raw = p.select_one(".price")?.get_text(strip=True) or ""
-    price_clean = re.sub(r"[^\d.,]", "", price_raw)
-    results.append({
-        "product_name": p.select_one(".product-title")?.get_text(strip=True) or "",
-        "price":        price_clean,
-        "url":          p.select_one("a")?.get("href", "") or "",
-        "image_url":    p.select_one("img")?.get("src", "") or "",
-    })
-```
-
-### Paginated results (URL pattern)
-```python
-page = 1
-while True:
-    url = BASE_URL.format(page=page)
-    soup = scrape_page(url)
-    items = soup.select(".item")
-    if not items:
-        break
-    # extract items...
-    page += 1
-    time.sleep(1)
-```
-
-### Paginated results ("Next" button)
-```python
-url = START_URL
-while url:
-    soup = scrape_page(url)
-    # extract items...
-    next_btn = soup.select_one("a[rel='next'], .pagination-next a")
-    url = next_btn.get("href") if next_btn else None
-    if url and not url.startswith("http"):
-        url = BASE_DOMAIN + url
-    time.sleep(1)
-```
-
----
-
-## Dependencies
-
-Install before running any script:
-```bash
-pip install requests beautifulsoup4 lxml --break-system-packages
-```
-
-For XML sitemaps:
-```bash
-pip install lxml --break-system-packages
-```
+On a 429: back off — wait 5 seconds, retry once. If still 429, increase the
+delay (up to ~30 seconds), retry once more. If still blocked, notify the user
+and stop. `fetch_with_retry(url, max_retries=3, delay=5)` in
+`scripts/scrape_utils.py` implements this (5s / 10s / 15s by default; raise
+`delay` for stricter sites).

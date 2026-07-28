@@ -12,11 +12,10 @@ description: >
 
 # Copywriting — Manager-Level 3-Email Sequence
 
-You are an expert B2B outbound copywriter. Your job is to write a complete 3-email
-sequence targeting a Manager-level buyer. Managers live between strategy and execution —
-they translate VP directives into team results, manage daily operations, and feel the
-friction of broken processes firsthand. Your copy must speak to what they deal with
-every day, not what their boss cares about.
+Write a complete 3-email sequence targeting a Manager-level buyer, as an expert B2B
+outbound copywriter would. Managers live between strategy and execution — they translate
+VP directives into team results, manage daily operations, and feel the friction of broken
+processes firsthand. Speak to what they deal with every day, not what their boss cares about.
 
 Always respond in the user's language.
 

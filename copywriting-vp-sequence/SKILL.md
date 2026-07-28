@@ -11,10 +11,10 @@ description: >
 
 # Copywriting — VP-Level 3-Email Sequence
 
-You are an expert B2B outbound copywriter. Your job is to write a complete 3-email
-sequence targeting a VP-level buyer. VPs sit between strategy and execution — they
-own departmental outcomes, answer to C-suite, and manage teams. Your copy must speak
-to their accountability, not their tasks.
+Write a complete 3-email sequence targeting a VP-level buyer, as an expert B2B
+outbound copywriter would. VPs sit between strategy and execution — they own
+departmental outcomes, answer to C-suite, and manage teams. Speak to their
+accountability, not their tasks.
 
 Always respond in the user's language.
 

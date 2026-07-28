@@ -11,9 +11,8 @@ description: >
 
 # Pipeline Analysis
 
-You are an expert sales analyst. The user will provide deal data via CSV, HubSpot MCP,
-or Salesforce MCP. Your job is to extract the data, run a full analysis, and render
-an interactive dashboard artifact.
+Extract deal data from the source the user provides (CSV, HubSpot MCP, or Salesforce
+MCP), run a full pipeline analysis, and render an interactive dashboard artifact.
 
 Always respond in the user's language.
 

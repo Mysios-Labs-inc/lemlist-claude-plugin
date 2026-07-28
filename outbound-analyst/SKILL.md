@@ -26,143 +26,16 @@ If they share multiple stats, do a full audit. If they share one number, give a 
 
 ## Step 2 — Apply the right benchmark
 
-### 🎯 Reply Rate — THE metric that matters most
+Read [references/benchmarks.md](references/benchmarks.md) for the full lookup tables (from 244K campaigns, 249M emails) and pull the number(s) matching the metric(s) in play:
 
-The single KPI to track. If there's only one number to care about, it's this one.
-
-**Email-only campaigns** (from 244K campaigns, 249M emails):
-| Verdict | Rate |
-|---|---|
-| ❌ Bad | < 2% |
-| 🟡 Average | ~2–4% |
-| ✅ Good | 4–10% |
-| 🚀 Really good | 15%+ |
-| 🏆 Exceptional | 25%+ (tight list + sharp copy) |
-
-**Global reply rate by channel** (accounts for all touchpoints):
-| Channel mix | Global reply rate |
-|---|---|
-| Email only | 1.1% |
-| LinkedIn + Email | 4.7% |
-| LinkedIn + Email + Call | 2.8%* |
-| LinkedIn-first sequences | 5.7% |
-| Email-first sequences | 2.6% |
-
-*Call adds friction at scale — the bottleneck effect kicks in.
-
-**By list size** (tighter = better):
-| List size | Global reply rate |
-|---|---|
-| 6–50 leads | 5.3% |
-| 51–200 leads | 3.2% |
-| 201–500 leads | 2.3% |
-| 501–1,000 leads | 1.9% |
-| 1,000+ leads | 1.1% |
-
-**By steps — LinkedIn + Email** (sweet spot = 3 steps):
-| Steps | Global reply rate |
-|---|---|
-| 2 steps | 7.0% |
-| 3 steps | 7.2% ← sweet spot |
-| 4 steps | 5.0% |
-| 5+ steps | 3.4% |
-
-**By steps — Email only** (more steps ≠ better):
-| Steps | Global reply rate |
-|---|---|
-| 2 steps | 1.9% |
-| 3 steps | 1.3% |
-| 4 steps | 1.1% |
-| 5+ steps | 0.7% |
-
----
-
-### 📬 Open Rate — track with caution
-
-**Should you track it?** Not really. It's unreliable — tracking opens requires a pixel that actively hurts deliverability. Treat it as a rough signal only.
-
-| Persona / context | Typical open rate |
-|---|---|
-| Global average | ~25% |
-| C-Levels | ~15% |
-| Sales reps | ~25–35% |
-| Marketing | ~15% |
-| HR | ~25–35% |
-| Tech | ~5% |
-| **Good (signal of strong subject line)** | **50%+** |
-
-If open rate is high but reply rate is low: the subject line works, the body doesn't. Fix the copy, not the subject line.
-
----
-
-### 🖱️ Click Rate — red herring
-
-**Should you track it?** No. Tracking clicks requires links. Links hurt deliverability. Click rate doesn't correlate with pipeline. Drop links from cold emails entirely. If you need one link, use a separate landing page and track traffic there instead.
-
----
-
-### 🧘 Positive Reply Rate (PRR) — meetings booked
-
-The % of all contacted leads who replied with genuine interest (not just "remove me").
-
-| Verdict | Rate |
-|---|---|
-| Industry average | 0.1–0.5% (1–5 meetings per 1,000 emails) |
-| ✅ Good | 1–5% |
-| 🏆 Exceptional | > 5 meetings per 100 leads contacted |
-
-Note: PRR ≠ meetings booked. A "yes send me the resource" is a PRR if you're running a lead magnet campaign — not every PRR needs to end in a calendar invite.
-
----
-
-### 🙆 LinkedIn Connection Accept Rate
-
-Like deliverability for email: if you can't get in, nothing else matters.
-
-| Persona | Accept rate benchmark |
-|---|---|
-| Individual Contributors | ~25% |
-| C-Level | ~35% |
-| Tech profiles | 40%+ |
-
-Low accept rate = wrong targeting, generic note, or profile that doesn't build trust at first glance. Fix the profile and the connection message before adjusting anything else.
-
-**LinkedIn voice note vs text** (from 8,364 campaigns):
-- Text only: 26.9% LinkedIn reply rate
-- With voice note: 29.5% (+10% relative uplift — strongest for young/urban audiences)
-
----
-
-### 📞 Calling benchmarks
-
-| Metric | Average | Elite |
-|---|---|---|
-| Connect rate | 5–20% | — |
-| Conversation rate | 5–10% | — |
-| Meeting booked rate | 1–3% | 3–5% |
-
-Best times: 8–10 AM and 4–6 PM. Avoid 12–2 PM. 3–4 call attempts per lead optimal (most reps stop at 2). Cold calling works 10x better when it's not truly cold — always layer with email or LinkedIn first.
-
----
-
-### 🥵 Deliverability / Warmup
-
-**Are you healthy?** Check your warmup score — you want 90+ before sending cold campaigns. Keep warmup ON permanently. Turning it off signals to email providers that you're done playing by the rules.
-
-Timeline: wait 3–4 weeks on a new domain/inbox before sending cold emails.
-
----
-
-### 🚫 Sending limits
-
-| Volume | Verdict |
-|---|---|
-| 30 emails/day/inbox | ✅ Safe — lemlist's recommended max |
-| 30–50/day | ⚠️ Acceptable only with 90+ deliverability + 15% reply + >2% PRR |
-| 100+/day | ❌ You will land in spam |
-
-**The right scaling move:** don't push more emails per inbox. Add more inboxes.
-- 5 inboxes × 30 emails/day = 150 emails/day, safely.
+- 🎯 **Reply rate** — THE metric that matters most; broken down by channel mix, list size, and step count
+- 📬 **Open rate** — track with caution, weak signal only
+- 🖱️ **Click rate** — red herring, don't track
+- 🧘 **Positive reply rate (PRR)** — meetings booked / genuine interest
+- 🙆 **LinkedIn connection accept rate** — by persona, plus voice note vs text
+- 📞 **Calling benchmarks** — connect, conversation, meeting-booked rates
+- 🥵 **Deliverability / warmup** — target score and new-domain timeline
+- 🚫 **Sending limits** — safe volume per inbox and scaling strategy
 
 ---
 
@@ -172,7 +45,7 @@ Structure every response as:
 
 **[Metric]: [X%]**
 Verdict: ❌ / 🟡 / ✅ / 🚀 — [one-line judgment]
-Benchmark: [relevant reference point from above]
+Benchmark: [relevant reference point from references/benchmarks.md]
 Root cause: [most likely explanation given their context]
 Fix: [1–2 concrete actions, specific and direct]
 

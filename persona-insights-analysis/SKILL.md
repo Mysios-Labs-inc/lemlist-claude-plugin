@@ -18,6 +18,14 @@ a structured report that informs GTM strategy, messaging, sales enablement, and 
 
 Always respond in the user's language.
 
+## Bundled resources
+
+- `references/extraction-taxonomy.md` — the full 10-dimension insight extraction taxonomy
+  (what to look for, how to categorize, how to tag). Read it before starting Phase 4.
+- `assets/report-template.md` — the Persona Intelligence Report skeletons (dashboard tab
+  structure and long-form document outline) plus the required closing sections. Use it as
+  the output scaffold in Phase 6 and Phase 7.
+
 ---
 
 ## Phase 1 — Clarify Before Starting
@@ -123,97 +131,27 @@ If a prospect doesn't fit any target persona → include in an "Other" group.
 
 ## Phase 4 — Insight Extraction
 
-For each persona group, extract the following dimensions from all relevant transcripts.
+For each persona group, extract all 10 dimensions below from the relevant transcripts.
 Quote verbatims directly — never paraphrase or invent quotes.
 
-### 4.1 — Goals & Objectives
-What is this persona trying to achieve?
-- Business goals (e.g., "increase pipeline by 30%", "reduce ramp time for new reps")
-- Personal goals (e.g., "prove ROI to my CFO", "get promoted", "reduce stress")
-- KPIs they are measured on (if mentioned)
-- Time horizon (this quarter / this year / long-term)
+**Read `references/extraction-taxonomy.md` before extracting** — it holds the full
+definition of each dimension: sub-questions to answer, categorization schemes
+(pain types, objection types, request tagging), and verbatim guidance.
 
-Extract verbatims: direct quotes where the prospect describes what success looks like.
+Taxonomy index:
 
-### 4.2 — Pains & Frustrations
-What problems are they experiencing?
-- Current situation pain (what's broken today)
-- Impact of the pain (revenue, time, team morale, churn)
-- Workarounds they're using (and why they're insufficient)
-- Emotional language (frustrated, overwhelmed, embarrassed, stuck)
-
-Extract verbatims: the most visceral, specific quotes about pain.
-Tag each pain as: **Functional** (process/tool issue) / **Emotional** (feeling) / **Social** (perception by others)
-
-### 4.3 — Triggers & Buying Events
-What caused them to look for a solution NOW?
-- Recent event (new hire, lost deal, board pressure, competitor win)
-- Timing trigger (end of quarter, new fiscal year, headcount increase)
-- Failed alternative (previous tool didn't work)
-- Inbound signal (read a post, saw a demo, referred by someone)
-
-### 4.4 — Objections
-What concerns or blockers did they raise?
-Categorize by type:
-- **Price / Budget** — cost concerns, ROI questions, budget cycle
-- **Timing** — "not the right time", "too busy", "Q4 is crazy"
-- **Trust / Proof** — "show me it works for companies like us"
-- **Internal buy-in** — "I need to convince my manager / CFO / IT"
-- **Technical / Integration** — "will it work with our stack?"
-- **Competition** — "we're already using X", "why not just use Y?"
-- **Complexity / Risk** — "worried about change management", "our team won't adopt it"
-
-For each objection: extract verbatim, note how the rep handled it, and rate the
-handling as Effective / Neutral / Missed.
-
-### 4.5 — Feature Requests & Product Gaps
-What did they ask for that doesn't exist (or they didn't know exists)?
-- Explicit requests ("I wish it could…", "do you have…?", "we need…")
-- Implied gaps (pain described that maps to a missing capability)
-- Workarounds mentioned that suggest a product gap
-
-Tag each as: **Requested** (explicitly asked) / **Implied** (inferred from pain).
-Note frequency: how many calls mentioned this request.
-
-### 4.6 — Competitive Landscape
-What alternatives are they considering or currently using?
-- Named competitors mentioned
-- "Build vs buy" discussions
-- Previous tools they tried (and why they failed)
-- What they like about current solution (switching cost)
-
-### 4.7 — Buying Process & Decision Dynamics
-How do they buy?
-- Who else is involved in the decision (champion, economic buyer, blocker, IT)
-- Typical procurement process (legal, security review, procurement)
-- Timeline to decision
-- Budget availability and cycle
-- Success metrics they will use to evaluate
-
-### 4.8 — Language & Vocabulary
-What exact words and phrases does this persona use?
-- Industry jargon specific to this persona
-- Words they use to describe their pain (never your product's words)
-- Metaphors or analogies they use
-- What they call the problem you solve
-
-This section feeds directly into messaging and copywriting.
-
-### 4.9 — Buying Signals & Positive Indicators
-What signals indicate high intent?
-- Questions about implementation, onboarding, timeline
-- Mentions of budget or budget cycle
-- Requests for a business case or ROI calculation
-- References to an internal champion
-- Urgency language ("we need this before…", "asap", "this quarter")
-
-### 4.10 — Red Flags & Disqualifiers
-What signals suggest low fit or low intent?
-- Vague pain ("we're just exploring")
-- No urgency or trigger identified
-- Decision-maker not present
-- Budget not allocated
-- Misaligned use case
+| # | Dimension | Extract |
+|---|---|---|
+| 4.1 | Goals & Objectives | business + personal goals, KPIs, time horizon |
+| 4.2 | Pains & Frustrations | broken today, impact, workarounds; tag Functional / Emotional / Social |
+| 4.3 | Triggers & Buying Events | why now: events, timing, failed alternatives, inbound signals |
+| 4.4 | Objections | 7 objection types + rep handling rated Effective / Neutral / Missed |
+| 4.5 | Feature Requests & Product Gaps | explicit vs implied, tagged Requested / Implied, with frequency |
+| 4.6 | Competitive Landscape | named competitors, build vs buy, past tools, switching cost |
+| 4.7 | Buying Process & Decision Dynamics | stakeholders, procurement, timeline, budget, success metrics |
+| 4.8 | Language & Vocabulary | their words for the problem — feeds messaging and copywriting |
+| 4.9 | Buying Signals & Positive Indicators | high-intent signals (implementation questions, budget, urgency) |
+| 4.10 | Red Flags & Disqualifiers | low-fit / low-intent signals |
 
 ---
 
@@ -248,97 +186,30 @@ didn't address, or language mismatches between rep and prospect vocabulary.
 
 ## Phase 6 — Output Format
 
-### If dashboard artifact (React)
+Use `assets/report-template.md` as the output scaffold:
 
-Build a tabbed interactive dashboard:
+- **Option A — Interactive dashboard (React artifact)**: tabbed layout (Overview, one tab
+  per persona, Objections, Feature Gaps, Competitive, Messaging), per-persona tab contents,
+  and the required charts / color-coded handling ratings.
+- **Option B — Structured document (inline)**: the long-form "Persona Intelligence Report"
+  heading outline, from Methodology & Dataset through the full verbatim appendix.
 
-```
-Header: "[Product] Persona Intelligence Report"
-Subtitle: "Based on X transcripts | Analyzed: [date] | Confidence: [Low/Medium/High]"
-
-TABS:
-├── Overview       → summary stats + top insights per persona (cards)
-├── [Persona 1]    → full breakdown for this persona
-├── [Persona 2]    → full breakdown for this persona
-├── [Persona N]    → ...
-├── Objections     → ranked objection table + handling analysis
-├── Feature Gaps   → ranked feature request table with frequency
-├── Competitive    → competitors mentioned + switching context
-└── Messaging      → vocabulary, language patterns, messaging recommendations
-```
-
-Each persona tab contains:
-- Profile card (title, seniority, function, # calls analyzed)
-- Goals (bullet list with verbatim)
-- Pains (categorized: Functional / Emotional / Social, with verbatims)
-- Triggers (what caused them to look now)
-- Objections (type + verbatim + handling rating)
-- Feature requests (explicit + implied)
-- Buying process (stakeholders, timeline, budget signals)
-- Verbatim bank (top 5–8 most powerful quotes from this persona)
-- Recommended messaging (3 message angles based on insights)
-
-Visual elements:
-- Bar chart: objection frequency by type
-- Bar chart: feature request frequency
-- Tag cloud or word list: persona vocabulary
-- Color-coded handling ratings (green/yellow/red) on objection table
-
-### If structured document (inline)
-
-Produce a long-form report with this structure:
-
-```
-# Persona Intelligence Report
-## Methodology & Dataset
-## Persona Profiles
-### [Persona 1 Name]
-  #### Goals & Objectives
-  #### Pains & Frustrations
-  #### Triggers
-  #### Objections
-  #### Feature Requests
-  #### Buying Process
-  #### Verbatim Bank
-  #### Recommended Messaging
-### [Persona 2 Name]
-  ...
-## Cross-Persona Synthesis
-## Objection Frequency Analysis
-## Feature Gap Analysis
-## Competitive Intelligence
-## Messaging Recommendations
-## ICP Signal Patterns
-## Appendix — Full Verbatim Index
-```
+Follow whichever format was chosen in Phase 1 (or produce both). Keep the header line
+stating product name, transcript count, analysis date, and confidence level.
 
 ---
 
 ## Phase 7 — Recommendations
 
-At the end of every report, always include:
+Every report ends with three required sections, detailed in the "Closing sections"
+part of `assets/report-template.md`:
 
-### Immediate actions (this week)
-3–5 specific, actionable items:
-- Messaging changes to make in sequences or decks
-- Objection handling scripts to add to the sales playbook
-- Discovery questions to add based on triggers identified
-- Feature requests to escalate to product team
-
-### Sales enablement outputs to create
-Based on the insights, recommend:
-- Talk tracks per persona (with exact language to use)
-- Objection handling cards
-- ROI calculator angles
-- Case study angles that match stated pains
-- lemlist sequence angles (which pain to lead with per persona)
-
-### Confidence & limitations
-Always state:
-- Number of transcripts analyzed per persona
-- Confidence level (Low / Medium / High)
-- Any gaps in the data (e.g., "no C-suite calls in dataset", "all calls were early-stage")
-- Recommended next calls to run to fill gaps
+1. **Immediate actions (this week)** — 3–5 specific, actionable items (messaging changes,
+   objection handling scripts, new discovery questions, feature requests to escalate).
+2. **Sales enablement outputs to create** — talk tracks, objection handling cards, ROI
+   calculator angles, case study angles, sequence angles per persona.
+3. **Confidence & limitations** — transcripts per persona, confidence level, data gaps,
+   and recommended next calls to run to fill those gaps.
 
 ---
 
