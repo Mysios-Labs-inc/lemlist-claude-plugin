@@ -11,7 +11,7 @@ A collection of GTM, outbound, and revenue-ops [skills](https://docs.claude.com/
 /plugin install lemlist-skills@lemlist-skills
 ```
 
-All 35 skills become invokable immediately — no `npx`, no copying files into `~/.claude/skills`, and `/plugin update` pulls new skills as they're added. The plugin also wires up the [lemlist MCP server](https://developer.lemlist.com/mcp/setup) (`https://app.lemlist.com/mcp`), so skills can call lemlist's campaign, lead, and analytics data directly instead of going through the API by hand.
+All 38 skills become invokable immediately — no `npx`, no copying files into `~/.claude/skills`, and `/plugin update` pulls new skills as they're added. The plugin also wires up the [lemlist MCP server](https://developer.lemlist.com/mcp/setup) (`https://app.lemlist.com/mcp`), so skills can call lemlist's campaign, lead, and analytics data directly instead of going through the API by hand.
 
 ### Via npx (no plugin support needed)
 
@@ -20,7 +20,7 @@ You need [Node.js](https://nodejs.org) 18+ and Claude Code installed. No npm pub
 ### Interactive picker (recommended)
 
 ```sh
-npx github:l3mpire/claude-skills
+npx github:Mysios-Labs-inc/lemlist-claude-plugin
 ```
 
 You'll get an arrow-key checklist. Keys:
@@ -37,13 +37,13 @@ You'll get an arrow-key checklist. Keys:
 ### Install specific skills by name
 
 ```sh
-npx github:l3mpire/claude-skills icp-definer copywriting-first-touch outbound-analyst
+npx github:Mysios-Labs-inc/lemlist-claude-plugin icp-definer copywriting-first-touch outbound-analyst
 ```
 
 ### Install everything
 
 ```sh
-npx github:l3mpire/claude-skills --all
+npx github:Mysios-Labs-inc/lemlist-claude-plugin --all
 ```
 
 ## Where they go
@@ -52,16 +52,19 @@ By default, skills install to your user-global directory:
 
 ```
 ~/.claude/skills/<skill-name>/SKILL.md
+~/.claude/skills/<skill-name>/references/   (where present)
+~/.claude/skills/<skill-name>/scripts/      (where present)
+~/.claude/skills/<skill-name>/assets/       (where present)
 ```
 
-Restart Claude Code (or start a new session) and the skills become invokable — Claude will discover them automatically based on each skill's `description` field.
+The installer copies each skill folder recursively, so any bundled `references/`, `scripts/`, or `assets/` come along automatically — no extra steps. Restart Claude Code (or start a new session) and the skills become invokable — Claude will discover them automatically based on each skill's `description` field.
 
 ### Project-local install
 
 Add `--project` to install into the current repo instead, scoping the skills to that project only:
 
 ```sh
-npx github:l3mpire/claude-skills --project icp-definer
+npx github:Mysios-Labs-inc/lemlist-claude-plugin --project icp-definer
 # installs to ./.claude/skills/icp-definer/
 ```
 
@@ -84,6 +87,21 @@ Each skill is a self-contained folder. Remove the ones you don't want:
 ```sh
 rm -rf ~/.claude/skills/icp-definer
 ```
+
+## Skill structure
+
+Every skill is a self-contained folder with a required `SKILL.md`. A handful of the larger
+skills also bundle:
+
+- `references/` — lookup material Claude loads only when needed (e.g. per-platform integration
+  guides in `n8n-workflow-builder`, benchmark tables in `outbound-analyst`, the objection
+  reference in `cold-call-script`)
+- `scripts/` — runnable code for deterministic steps (e.g. the scraping scripts in
+  `website-scraper`, the deck generator in `slide-deck-builder`)
+- `assets/` — output templates (e.g. the report template in `persona-insights-analysis`)
+
+`SKILL.md` stays lean and points to these files by name when they're relevant, so a skill only
+pulls in the extra context it actually needs for the task at hand.
 
 ## Available skills
 
