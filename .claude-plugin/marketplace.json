@@ -1,0 +1,13 @@
+{
+  "name": "lemlist-skills",
+  "owner": {
+    "name": "lemlist"
+  },
+  "plugins": [
+    {
+      "name": "lemlist-skills",
+      "source": "./",
+      "description": "GTM, outbound, and revenue-ops skills for Claude Code — ICP definition, list building, copywriting, campaign design, CRM hygiene, and more."
+    }
+  ]
+}

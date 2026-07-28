@@ -1,0 +1,14 @@
+{
+  "name": "lemlist-skills",
+  "displayName": "lemlist GTM Skills",
+  "version": "1.0.0",
+  "description": "GTM, outbound, and revenue-ops skills for Claude Code — ICP definition, list building, copywriting, campaign design, CRM hygiene, and more, backed by empirical lemlist campaign data and the lemlist MCP.",
+  "author": {
+    "name": "lemlist"
+  },
+  "homepage": "https://github.com/l3mpire/claude-skills",
+  "repository": "https://github.com/Mysios-Labs-inc/lemlist-claude-plugin",
+  "license": "MIT",
+  "keywords": ["gtm", "outbound", "sales", "lemlist", "copywriting", "crm", "prospecting", "mcp"],
+  "skills": ["."]
+}

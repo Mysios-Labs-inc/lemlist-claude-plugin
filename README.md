@@ -4,6 +4,17 @@ A collection of GTM, outbound, and revenue-ops [skills](https://docs.claude.com/
 
 ## Install
 
+### As a Claude Code plugin (recommended)
+
+```
+/plugin marketplace add Mysios-Labs-inc/lemlist-claude-plugin
+/plugin install lemlist-skills@lemlist-skills
+```
+
+All 35 skills become invokable immediately — no `npx`, no copying files into `~/.claude/skills`, and `/plugin update` pulls new skills as they're added. The plugin also wires up the [lemlist MCP server](https://developer.lemlist.com/mcp/setup) (`https://app.lemlist.com/mcp`), so skills can call lemlist's campaign, lead, and analytics data directly instead of going through the API by hand.
+
+### Via npx (no plugin support needed)
+
 You need [Node.js](https://nodejs.org) 18+ and Claude Code installed. No npm publish required — the installer is shipped straight from GitHub via `npx`.
 
 ### Interactive picker (recommended)
