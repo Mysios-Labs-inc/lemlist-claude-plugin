@@ -10,5 +10,5 @@
   "repository": "https://github.com/Mysios-Labs-inc/lemlist-claude-plugin",
   "license": "MIT",
   "keywords": ["gtm", "outbound", "sales", "lemlist", "copywriting", "crm", "prospecting", "mcp"],
-  "skills": ["."]
+  "skills": ["./"]
 }
